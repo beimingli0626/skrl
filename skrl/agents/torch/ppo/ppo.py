@@ -244,6 +244,24 @@ class PPO(Agent):
             self._current_log_prob = log_prob
 
         return actions, log_prob, outputs
+    
+    def inference(self, states: torch.Tensor) -> torch.Tensor:
+        """Process the environment's states to make a decision (actions) using the main policy
+
+        :param states: Environment's states
+        :type states: torch.Tensor
+        :param timestep: Current timestep
+        :type timestep: int
+        :param timesteps: Number of timesteps
+        :type timesteps: int
+
+        :return: Actions
+        :rtype: torch.Tensor
+        """
+        self.set_mode("eval")
+        actions, _, _ = self.policy.act({"states": self._state_preprocessor(states)}, role="policy")
+        return actions
+
 
     def record_transition(
         self,

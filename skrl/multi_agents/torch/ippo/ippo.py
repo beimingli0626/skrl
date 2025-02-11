@@ -265,6 +265,26 @@ class IPPO(MultiAgent):
             self._current_log_prob = log_prob
 
         return actions, log_prob, outputs
+    
+    def inference(self, states: torch.Tensor) -> torch.Tensor:
+        """Process the environment's states to make a decision (actions) using the main policy
+
+        :param states: Environment's states
+        :type states: torch.Tensor
+        :param timestep: Current timestep
+        :type timestep: int
+        :param timesteps: Number of timesteps
+        :type timesteps: int
+
+        :return: Actions
+        :rtype: torch.Tensor
+        """
+        self.set_mode("eval")
+        data = [self.policies[uid].act({"states": self._state_preprocessor[uid](states[uid])}, role="policy")
+                for uid in self.possible_agents]
+        actions = {uid: d[0] for uid, d in zip(self.possible_agents, data)}
+        return actions
+
 
     def record_transition(
         self,

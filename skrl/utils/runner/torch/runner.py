@@ -197,7 +197,8 @@ class Runner:
 
         :return: Model instances
         """
-        multi_agent = isinstance(env, MultiAgentEnvWrapper)
+        # multi_agent = isinstance(env, MultiAgentEnvWrapper)
+        multi_agent = len(env.possible_agents) > 1
         device = env.device
         possible_agents = env.possible_agents if multi_agent else ["agent"]
         state_spaces = env.state_spaces if multi_agent else {"agent": env.state_space}
@@ -328,7 +329,8 @@ class Runner:
 
         :return: Agent instances
         """
-        multi_agent = isinstance(env, MultiAgentEnvWrapper)
+        # multi_agent = isinstance(env, MultiAgentEnvWrapper)
+        multi_agent = len(env.possible_agents) > 1
         device = env.device
         num_envs = env.num_envs
         possible_agents = env.possible_agents if multi_agent else ["agent"]
