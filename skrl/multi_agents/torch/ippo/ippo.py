@@ -468,9 +468,9 @@ class IPPO(MultiAgent):
             # sample mini-batches from memory
             sampled_batches = memory.sample_all(names=self._tensors_names, mini_batches=self._mini_batches[uid])
 
-            cumulative_policy_loss = 0
-            cumulative_entropy_loss = 0
-            cumulative_value_loss = 0
+            cumulative_policy_loss = {uid: 0 for uid in self.possible_agents}
+            cumulative_entropy_loss = {uid: 0 for uid in self.possible_agents}
+            cumulative_value_loss = {uid: 0 for uid in self.possible_agents}
 
             # learning epochs
             for epoch in range(self._learning_epochs[uid]):
@@ -550,10 +550,10 @@ class IPPO(MultiAgent):
                     self.scaler.update()
 
                     # update cumulative losses
-                    cumulative_policy_loss += policy_loss.item()
-                    cumulative_value_loss += value_loss.item()
+                    cumulative_policy_loss[uid] += policy_loss.item()
+                    cumulative_value_loss[uid] += value_loss.item()
                     if self._entropy_loss_scale[uid]:
-                        cumulative_entropy_loss += entropy_loss.item()
+                        cumulative_entropy_loss[uid] += entropy_loss.item()
 
                 # update learning rate
                 if self._learning_rate_scheduler[uid]:
@@ -570,16 +570,16 @@ class IPPO(MultiAgent):
             # record data
             self.track_data(
                 f"Loss / Policy loss ({uid})",
-                cumulative_policy_loss / (self._learning_epochs[uid] * self._mini_batches[uid]),
+                cumulative_policy_loss[uid] / (self._learning_epochs[uid] * self._mini_batches[uid]),
             )
             self.track_data(
                 f"Loss / Value loss ({uid})",
-                cumulative_value_loss / (self._learning_epochs[uid] * self._mini_batches[uid]),
+                cumulative_value_loss[uid] / (self._learning_epochs[uid] * self._mini_batches[uid]),
             )
-            if self._entropy_loss_scale:
+            if self._entropy_loss_scale[uid]:
                 self.track_data(
                     f"Loss / Entropy loss ({uid})",
-                    cumulative_entropy_loss / (self._learning_epochs[uid] * self._mini_batches[uid]),
+                    cumulative_entropy_loss[uid] / (self._learning_epochs[uid] * self._mini_batches[uid]),
                 )
 
             self.track_data(
