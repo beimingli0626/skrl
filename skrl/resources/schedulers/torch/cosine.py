@@ -10,6 +10,7 @@ class CosineLR(_LRScheduler):
     def __init__(
         self,
         optimizer: torch.optim.Optimizer,
+        min_lr: float = 0,
         last_epoch: int = -1,
         total_epochs: int = 100,
         verbose: bool = False,
@@ -28,6 +29,7 @@ class CosineLR(_LRScheduler):
         self._last_lr = [group["lr"] for group in self.optimizer.param_groups]
         self.total_epochs = total_epochs
         self.initial_lr = optimizer.param_groups[0]["lr"]
+        self.min_lr = min_lr
         
     def step(self, epoch: Optional[int] = None) -> None:
         """
@@ -35,6 +37,6 @@ class CosineLR(_LRScheduler):
         """
         if epoch is not None:
             for group in self.optimizer.param_groups:
-                group["lr"] = self.initial_lr / 2 * (1 - math.cos(math.pi - math.pi * epoch / self.total_epochs))
+                group["lr"] = self.min_lr + (self.initial_lr - self.min_lr) / 2 * (1 - math.cos(math.pi - math.pi * epoch / self.total_epochs))
 
             self._last_lr = [group["lr"] for group in self.optimizer.param_groups]
